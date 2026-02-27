@@ -1,0 +1,9 @@
+/* .background-color {} changing the background of the web page */
+
+body {
+    background-color: cyan;
+}
+.image1 {
+    width: 200px;
+    height: 200px;
+}
