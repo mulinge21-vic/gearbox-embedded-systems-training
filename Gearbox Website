@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IoT Journey — 14 Weeks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --surface: #111827;
+      --surface2: #1a2333;
+      --accent: #00e5c0;
+      --accent2: #f97316;
+      --accent3: #a78bfa;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --border: #1e293b;
+      --done: #00e5c0;
+      --partial: #f97316;
+      --empty: #1e293b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.4;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      padding: 5rem 2rem 4rem;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.5;
+    }
+
+    .header-glow {
+      position: absolute;
+      top: -80px; left: -80px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(0,229,192,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .header-inner {
+      position: relative;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .tag {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 0.25rem 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      animation: fadeIn 0.6s ease both;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      animation: slideUp 0.7s ease both 0.1s;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .subtitle {
+      margin-top: 1rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      max-width: 480px;
+      line-height: 1.7;
+      animation: slideUp 0.7s ease both 0.2s;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,14,23,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+
+    nav a {
+      display: block;
+      padding: 1rem 1.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      white-space: nowrap;
+      border-right: 1px solid var(--border);
+      transition: color 0.2s, background 0.2s;
+    }
+
+    nav a:hover, nav a.active { color: var(--accent); background: rgba(0,229,192,0.04); }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+
+    section { margin-bottom: 5rem; }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent2);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── ABOUT ── */
+    #about .about-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 640px) {
+      #about .about-card { grid-template-columns: 1fr; }
+    }
+
+    .about-card h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    .about-card p {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 0.95rem;
+    }
+
+    .about-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .meta-item {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+    }
+
+    .meta-item .label { color: var(--muted); margin-bottom: 0.2rem; }
+    .meta-item .value { color: var(--accent); }
+
+    /* ── PROGRESS BAR ── */
+    .progress-overview {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .progress-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .progress-num small {
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .progress-bar-wrap {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .progress-bar-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent3));
+      transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ── WEEK GRID ── */
+    .weeks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .week-card {
+      background: var(--surface);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .week-card:hover { background: var(--surface2); }
+
+    .week-card.has-content::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--accent);
+    }
+
+    .week-card.partial::before { background: var(--accent2); }
+
+    .week-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .week-number {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    .week-status {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 0.2rem 0.5rem;
+      border: 1px solid currentColor;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .status-done { color: var(--done); }
+    .status-partial { color: var(--accent2); }
+    .status-empty { color: var(--muted); }
+
+    .week-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+
+    .week-title input {
+      background: transparent;
+      border: none;
+      font: inherit;
+      color: inherit;
+      width: 100%;
+      cursor: text;
+      outline: none;
+    }
+
+    .week-title input::placeholder { color: var(--muted); }
+
+    .week-body textarea {
+      width: 100%;
+      min-height: 90px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.65;
+      padding: 0.75rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .week-body textarea:focus { border-color: var(--accent); }
+    .week-body textarea::placeholder { color: var(--muted); }
+
+    .week-meta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .week-meta select, .week-meta input[type="date"] {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.3rem 0.5rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .week-meta select:focus,
+    .week-meta input[type="date"]:focus { border-color: var(--accent3); }
+
+    /* ── SAVE BUTTON ── */
+    .save-bar {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 200;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0e17;
+    }
+
+    .btn-primary:hover { background: #00ffd6; transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { color: var(--text); border-color: var(--muted); }
+
+    .save-toast {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .save-toast.show { opacity: 1; }
+
+    /* ── CAPSTONE ── */
+    #capstone .cap-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      position: relative;
+    }
+
+    #capstone .cap-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle at bottom right, rgba(167,139,250,0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .cap-card h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .cap-card h2 span { color: var(--accent3); }
+
+    .cap-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 640px) { .cap-fields { grid-template-columns: 1fr; } }
+
+    .field-group label {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .field-group input, .field-group textarea, .field-group select {
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      padding: 0.65rem 0.75rem;
+      outline: none;
+      line-height: 1.6;
+      transition: border-color 0.2s;
+    }
+
+    .field-group input:focus,
+    .field-group textarea:focus,
+    .field-group select:focus { border-color: var(--accent3); }
+
+    .field-group.full { grid-column: 1 / -1; }
+    .field-group textarea { min-height: 120px; resize: vertical; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .week-card { animation: fadeIn 0.4s ease both; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-grid"></div>
+  <div class="header-glow"></div>
+  <div class="header-inner">
+    <div class="tag">// IoT Course — 14 Weeks</div>
+    <h1>My IoT<br><span>Learning Journal</span></h1>
+    <p class="subtitle">Documenting each week of the Internet of Things course — sensors, protocols, cloud platforms, and everything in between.</p>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#about" class="active">About</a>
+    <a href="#progress">Weekly Progress</a>
+    <a href="#capstone">Capstone Project</a>
+  </div>
+</nav>
+
+<main>
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-label">01 — Profile</div>
+    <div class="about-card">
+      <div>
+        <h2>Who Am I?</h2>
+        <p id="about-text" contenteditable="true" style="outline:none; min-height:60px; cursor:text;">
+          Click here to write a short bio — your background, why you're taking this IoT course, and what you hope to build.
+        </p>
+      </div>
+      <div class="about-meta">
+        <div class="meta-item">
+          <div class="label">// Name</div>
+          <div class="value"><input id="meta-name" type="text" placeholder="Your Name" style="background:transparent;border:none;color:var(--accent);font-family:'Space Mono',monospace;font-size:0.78rem;outline:none;width:100%;" /></div>
+        </div>
+        <div class="meta-item">
+          <div class="label">// Institution</div>
+          <div class="value"><input id="meta-inst" type="text" placeholder="University / Organization" style="background:transparent;border:none;color:var(--accent);font-family:'Space Mono',monospace;font-size:0.78rem;outline:none;width:100%;" /></div>
+        </div>
+        <div class="meta-item">
+          <div class="label">// Course Year</div>
+          <div class="value"><input id="meta-year" type="text" placeholder="e.g. 2025" style="background:transparent;border:none;color:var(--accent);font-family:'Space Mono',monospace;font-size:0.78rem;outline:none;width:100%;" /></div>
+        </div>
+        <div class="meta-item">
+          <div class="label">// Location</div>
+          <div class="value"><input id="meta-loc" type="text" placeholder="Nairobi, Kenya" style="background:transparent;border:none;color:var(--accent);font-family:'Space Mono',monospace;font-size:0.78rem;outline:none;width:100%;" /></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WEEKLY PROGRESS -->
+  <section id="progress">
+    <div class="section-label">02 — Weekly Progress</div>
+    <div class="progress-overview">
+      <div>
+        <div class="progress-num"><span id="completed-count">0</span><small>/14</small></div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);margin-top:0.25rem;">weeks logged</div>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-label">Overall Completion</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="weeks-grid" id="weeks-grid"></div>
+  </section>
+
+  <!-- CAPSTONE -->
+  <section id="capstone">
+    <div class="section-label">03 — Capstone Project</div>
+    <div class="cap-card">
+      <h2>Final Project Concept <span>✦</span></h2>
+      <div class="cap-fields">
+        <div class="field-group">
+          <label>Project Title</label>
+          <input id="cap-title" type="text" placeholder="e.g. Smart Urban Greenhouse Monitor" />
+        </div>
+        <div class="field-group">
+          <label>Problem Being Solved</label>
+          <input id="cap-problem" type="text" placeholder="e.g. Manual crop monitoring is inefficient..." />
+        </div>
+        <div class="field-group full">
+          <label>Project Description</label>
+          <textarea id="cap-desc" rows="4" placeholder="Describe the project in detail..."></textarea>
+        </div>
+        <div class="field-group">
+          <label>IoT Technologies / Sensors</label>
+          <textarea id="cap-tech" rows="3" placeholder="e.g. ESP32, MQTT, AWS IoT Core..."></textarea>
+        </div>
+        <div class="field-group">
+          <label>Expected Outcomes / Impact</label>
+          <textarea id="cap-impact" rows="3" placeholder="e.g. Reduce water usage by 40%..."></textarea>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="save-bar">
+  <span class="save-toast" id="toast">✓ Saved locally</span>
+  <button class="btn btn-secondary" onclick="exportHTML()">Export HTML</button>
+  <button class="btn btn-primary" onclick="saveData()">Save Progress</button>
+</div>
+
+<footer>
+  IoT Course Journal &nbsp;·&nbsp; Built with intention &nbsp;·&nbsp; Inspired by Fab Academy 2025
+</footer>
+
+<script>
+  const WEEK_TOPICS = [
+    "Introduction to IoT & Course Overview",
+    "Microcontrollers & Development Boards",
+    "Sensors & Actuators",
+    "Communication Protocols (UART, SPI, I2C)",
+    "Wireless Communication (Wi-Fi, Bluetooth)",
+    "MQTT & Messaging Protocols",
+    "Cloud Platforms & IoT Services",
+    "Edge Computing & Local Processing",
+    "Data Storage & Databases for IoT",
+    "IoT Security & Best Practices",
+    "Node-RED & Visual Programming",
+    "Mobile Apps & Dashboards",
+    "Systems Integration & Testing",
+    "Final Project Presentation & Showcase",
+  ];
+
+  let data = {
+    about: '', name: '', inst: '', year: '', loc: '',
+    weeks: WEEK_TOPICS.map((topic, i) => ({
+      topic, notes: '', status: 'empty', date: '',
+    })),
+    capstone: { title: '', problem: '', desc: '', tech: '', impact: '', arch: '', concepts: '' }
+  };
+
+  function loadData() {
+    try {
+      const saved = localStorage.getItem('iot-journal-v2');
+      if (saved) data = JSON.parse(saved);
+    } catch(e) {}
+  }
+
+  function renderWeeks() {
+    const grid = document.getElementById('weeks-grid');
+    grid.innerHTML = '';
+    data.weeks.forEach((week, i) => {
+      const div = document.createElement('div');
+      div.className = `week-card ${week.status === 'done' ? 'has-content' : week.status === 'partial' ? 'partial' : ''}`;
+      const statusLabel = week.status === 'done' ? 'Complete' : week.status === 'partial' ? 'In Progress' : 'Upcoming';
+      const statusClass = week.status === 'done' ? 'status-done' : week.status === 'partial' ? 'status-partial' : 'status-empty';
+
+      div.innerHTML = `
+        <div class="week-header">
+          <div class="week-number">// WEEK ${String(i+1).padStart(2,'0')}</div>
+          <div class="week-status ${statusClass}">${statusLabel}</div>
+        </div>
+        <div class="week-title">
+          <input type="text" value="${escHtml(week.topic)}" placeholder="Week topic..." data-week="${i}" data-field="topic" />
+        </div>
+        <div class="week-body">
+          <textarea placeholder="What did you learn?..." data-week="${i}" data-field="notes">${escHtml(week.notes)}</textarea>
+        </div>
+        <div class="week-meta">
+          <select data-week="${i}" data-field="status">
+            <option value="empty" ${week.status==='empty'?'selected':''}>Upcoming</option>
+            <option value="partial" ${week.status==='partial'?'selected':''}>In Progress</option>
+            <option value="done" ${week.status==='done'?'selected':''}>Complete</option>
+          </select>
+          <input type="date" value="${week.date||''}" data-week="${i}" data-field="date" />
+        </div>
+      `;
+      grid.appendChild(div);
+    });
+
+    grid.querySelectorAll('[data-week]').forEach(el => {
+      el.addEventListener('input', e => {
+        const i = +e.target.dataset.week;
+        const f = e.target.dataset.field;
+        data.weeks[i][f] = e.target.value;
+        if (f === 'status') updateCard(i);
+        updateProgress();
+        autoSave();
+      });
+    });
+    updateProgress();
+  }
+
+  function updateCard(i) {
+    const cards = document.querySelectorAll('.week-card');
+    if (!cards[i]) return;
+    const s = data.weeks[i].status;
+    cards[i].className = `week-card ${s === 'done' ? 'has-content' : s === 'partial' ? 'partial' : ''}`;
+    const statusEl = cards[i].querySelector('.week-status');
+    statusEl.className = `week-status ${s === 'done' ? 'status-done' : s === 'partial' ? 'status-partial' : 'status-empty'}`;
+    statusEl.textContent = s === 'done' ? 'Complete' : s === 'partial' ? 'In Progress' : 'Upcoming';
+  }
+
+  function updateProgress() {
+    const done = data.weeks.filter(w => w.status === 'done').length;
+    document.getElementById('completed-count').textContent = done;
+    document.getElementById('progress-fill').style.width = (done / 14 * 100) + '%';
+  }
+
+  function bindInputs() {
+    document.getElementById('about-text').addEventListener('input', e => { data.about = e.target.innerText; autoSave(); });
+    document.getElementById('meta-name').addEventListener('input', e => { data.name = e.target.value; autoSave(); });
+    document.getElementById('meta-inst').addEventListener('input', e => { data.inst = e.target.value; autoSave(); });
+    document.getElementById('meta-year').addEventListener('input', e => { data.year = e.target.value; autoSave(); });
+    document.getElementById('meta-loc').addEventListener('input', e => { data.loc = e.target.value; autoSave(); });
+    ['title','problem','desc','tech','impact'].forEach(f => {
+      const el = document.getElementById('cap-' + f);
+      if (el) el.addEventListener('input', e => { data.capstone[f] = e.target.value; autoSave(); });
+    });
+  }
+
+  function restoreInputs() {
+    const at = document.getElementById('about-text');
+    if (data.about) at.innerText = data.about;
+    if (data.name) document.getElementById('meta-name').value = data.name;
+    if (data.inst) document.getElementById('meta-inst').value = data.inst;
+    if (data.year) document.getElementById('meta-year').value = data.year;
+    if (data.loc) document.getElementById('meta-loc').value = data.loc;
+    ['title','problem','desc','tech','impact'].forEach(f => {
+      const el = document.getElementById('cap-' + f);
+      if (el && data.capstone[f]) el.value = data.capstone[f];
+    });
+  }
+
+  let saveTimer;
+  function autoSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => localStorage.setItem('iot-journal-v2', JSON.stringify(data)), 600);
+  }
+
+  function saveData() {
+    localStorage.setItem('iot-journal-v2', JSON.stringify(data));
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function exportHTML() {
+    const dataScript = `<script>window.__IOT_DATA__ = ${JSON.stringify(data)};<\/script>`;
+    let html = document.documentElement.outerHTML;
+    html = html.replace('</body>', `${dataScript}\n</body>`);
+    const blob = new Blob([html], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'iot-journal.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function escHtml(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  loadData();
+  if (window.__IOT_DATA__) {
+    data = window.__IOT_DATA__;
+    localStorage.setItem('iot-journal-v2', JSON.stringify(data));
+  }
+  renderWeeks();
+  restoreInputs();
+  bindInputs();
+
+  const sections = ['about','progress','capstone'];
+  window.addEventListener('scroll', () => {
+    let cur = 'about';
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && window.scrollY >= el.offsetTop - 120) cur = id;
+    });
+    document.querySelectorAll('nav a').forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+    });
+  });
+</script>
+</body>
+</html>
