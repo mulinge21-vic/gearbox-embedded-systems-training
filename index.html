@@ -1,166 +1,354 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IoT Learning Journal</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IoT Learning Journal — Victor Mulinge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,600;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet"/>
 <style>
-:root{
-  --bg:#0b0f1a;
-  --card:#121826;
-  --accent:#00e5c0;
-  --text:#e5e7eb;
-  --muted:#6b7280;
+:root {
+  --bg:     #0b0f1a;
+  --card:   #111827;
+  --card2:  #151f30;
+  --accent: #00e5c0;
+  --orange: #fb923c;
+  --text:   #e2e8f0;
+  --muted:  #64748b;
+  --border: #1e293b;
 }
-
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
-
-.container{max-width:1000px;margin:auto;padding:20px}
-
-h1{font-size:2.5rem;margin-bottom:10px}
-
-input,textarea,select{
-  width:100%;
-  padding:10px;
-  margin-top:5px;
-  margin-bottom:15px;
-  background:#0f172a;
-  border:1px solid #1f2937;
-  color:white;
-  border-radius:6px;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
 }
-
-.card{
-  background:var(--card);
-  padding:20px;
-  border-radius:10px;
-  margin-bottom:20px;
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: radial-gradient(circle, #1e293b 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: .4;
 }
+.wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 20px 80px; }
 
-.week{
-  border-left:4px solid var(--accent);
-  padding-left:10px;
-  margin-bottom:15px;
+/* HEADER */
+.site-header { padding: 52px 0 36px; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: .72rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
 }
-
-.progress{
-  height:8px;
-  background:#1f2937;
-  border-radius:5px;
-  overflow:hidden;
-  margin-bottom:20px;
+.eyebrow::before { content: ''; display: inline-block; width: 22px; height: 1px; background: var(--accent); }
+.site-header h1 {
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 700; letter-spacing: -.02em; line-height: 1.1; margin-bottom: 10px;
 }
+.site-header h1 span { color: var(--accent); }
+.site-header p { font-size: .9rem; color: var(--muted); max-width: 420px; }
 
-.progress div{
-  height:100%;
-  background:var(--accent);
+/* CARDS */
+.card { background: var(--card); border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
+.card-title {
+  font-family: 'DM Mono', monospace;
+  font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* PROFILE */
+.profile-name {
+  font-size: 1.25rem; font-weight: 700; margin-bottom: 6px;
+}
+.profile-about { font-size: .9rem; color: var(--muted); line-height: 1.75; }
+
+/* PROGRESS */
+.prog-header {
+  display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px;
+}
+.prog-label { font-size: .85rem; color: var(--muted); }
+.prog-count { font-family: 'DM Mono', monospace; font-size: .78rem; color: var(--accent); }
+.prog-bar { height: 4px; background: var(--border); overflow: hidden; margin-bottom: 24px; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #34d399); transition: width .7s cubic-bezier(.4,0,.2,1); }
+
+/* WEEK ITEMS */
+.week-list { display: flex; flex-direction: column; gap: 8px; }
+.week-item {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.week-item.done    { border-left-color: var(--accent); background: rgba(0,229,192,.05); }
+.week-item.partial { border-left-color: var(--orange); }
+
+.week-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px;
+  cursor: pointer; user-select: none;
+}
+.week-num {
+  font-family: 'DM Mono', monospace;
+  font-size: .68rem; color: var(--muted); white-space: nowrap; flex-shrink: 0;
+}
+.week-topic {
+  flex: 1; font-size: .9rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.week-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: .6rem; letter-spacing: .07em; text-transform: uppercase;
+  padding: 2px 7px; border: 1px solid currentColor; white-space: nowrap; flex-shrink: 0;
+}
+.week-badge.bempty   { color: var(--muted); }
+.week-badge.bpartial { color: var(--orange); }
+.week-badge.bdone    { color: var(--accent); }
+.week-chevron { flex-shrink: 0; color: var(--muted); font-size: .75rem; transition: transform .25s; }
+.week-item.open .week-chevron { transform: rotate(180deg); }
+
+.week-body {
+  display: none;
+  padding: 14px 14px 16px;
+  border-top: 1px solid var(--border);
+}
+.week-item.open .week-body { display: block; }
+
+.week-date {
+  font-family: 'DM Mono', monospace;
+  font-size: .68rem; color: var(--muted); margin-bottom: 10px;
+}
+.week-notes { font-size: .88rem; color: var(--text); line-height: 1.75; white-space: pre-wrap; }
+.week-notes.empty { color: var(--muted); font-style: italic; }
+
+/* CAPSTONE */
+.cap-title   { font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; }
+.cap-desc    { font-size: .9rem; color: var(--muted); line-height: 1.8; white-space: pre-wrap; }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  font-family: 'DM Mono', monospace;
+  font-size: .67rem; color: var(--muted); letter-spacing: .08em;
+  text-align: center;
 }
 </style>
 </head>
-
 <body>
-<div class="container">
+<div class="wrap">
 
-<h1>IoT Learning Journal</h1>
+  <header class="site-header">
+    <div class="eyebrow">Gearbox Nairobi · IoT &amp; Embedded Systems</div>
+    <h1>IoT Learning<br><span>Journal</span></h1>
+    <p>14 weeks of sensors, protocols, cloud platforms, and hands-on building.</p>
+  </header>
 
-<div class="card">
-<h3>Profile</h3>
-<input id="name" placeholder="Victor Mulinge">
-<textarea id="about" placeholder="I'm a final year student currently pursuing Electrical & Electronics Engineering at UoN.
-I'm also part of the Gearbox IoT & Embedded Systems class."></textarea>
+  <!-- PROFILE -->
+  <div class="card">
+    <div class="card-title">01 · Profile</div>
+    <div class="profile-name" id="el-name"></div>
+    <div class="profile-about" id="el-about"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="card">
+    <div class="card-title">02 · Weekly Progress</div>
+    <div class="prog-header">
+      <span class="prog-label">Completion</span>
+      <span class="prog-count"><span id="done-n">0</span> / 14 weeks</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="week-list" id="week-list"></div>
+  </div>
+
+  <!-- CAPSTONE -->
+  <div class="card">
+    <div class="card-title">03 · Capstone Project</div>
+    <div class="cap-title" id="el-cap-title"></div>
+    <div class="cap-desc"  id="el-cap-desc"></div>
+  </div>
+
 </div>
 
-<div class="card">
-<h3>Progress</h3>
-<div class="progress"><div id="bar" style="width:0%"></div></div>
-<div id="weeks"></div>
-</div>
-
-<div class="card">
-<h3>Capstone Project</h3>
-<input id="project" placeholder="Smart Surveillance and Access Control System">
-<textarea id="desc" placeholder="This project is a smart surveillance and access control system built to provide high-quality security at a price point that actually works for people. By using affordable hardware like Raspberry Pi or ESP32 controllers, solenoid locks, and even repurposed webcams, it delivers professional-grade protection without the massive market markup. Imagine being able to leave your heavy luggage in a secure locker room in the CBD, knowing it's protected by RFID or facial recognition, while you go about your business freely? I'm sure some people who leave their items at supermarkets would not feel the need to anymore. Whether it’s for these urban locker hubs, home security, or e-commerce delivery points, this project aims to make safety and convenience accessible to everyone. It bridges the gap between expensive proprietary systems and local needs, offering a remotely-accessible platform that proves security doesn't have to be a luxury.
-"></textarea>
-</div>
-
-</div>
+<footer>Victor Mulinge · IoT Learning Journal · Gearbox Nairobi · 2025</footer>
 
 <script>
-// Safe load (prevents JSON.parse crash if empty)
-function getLocalData(){
-  try{
-    return JSON.parse(localStorage.getItem("iot-simple")) || null;
-  }catch(e){
-    return null;
-  }
-}
+/* ============================================================
+   ✏️  EDIT YOUR JOURNAL DATA HERE
+   ============================================================
+   STATUS OPTIONS per week:
+     "empty"   → Upcoming   (grey)
+     "partial" → In Progress (orange)
+     "done"    → Complete   (green)
 
-let data = window.__IOT_DATA__ || getLocalData() || {
-  name:"",
-  about:"",
-  project:"",
-  desc:"",
-  weeks:Array.from({length:14},(_,i)=>({topic:"Week "+(i+1),done:false}))
+   DATE: leave "" if not yet attended, or write e.g. "2025-09-01"
+   NOTES: write what you learned. Leave "" if nothing yet.
+   ============================================================ */
+
+const DATA = {
+
+  /* ── PROFILE ─────────────────────────────────────── */
+  name:  "Victor Mulinge",
+  about: "I'm a final year student currently pursuing Electrical & Electronics Engineering at UoN. I'm also part of the Gearbox IoT & Embedded Systems class.",
+
+  /* ── WEEKS ───────────────────────────────────────── */
+  weeks: [
+    {
+      topic:  "Week One",
+      status: "done",   // "empty" | "partial" | "done"
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Two",
+      status: "done",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Three",
+      status: "done",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Four",
+      status: "done",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Five",
+      status: "done",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Six",
+      status: "done",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Seven",
+      status: "done",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Eight",
+      status: "done",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Nine",
+      status: "empty",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Ten",
+      status: "empty",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Eleven",
+      status: "empty",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Twelve",
+      status: "empty",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Week Thirteen",
+      status: "empty",
+      date:   "",
+      notes:  "",
+    },
+    {
+      topic:  "Final Project Presentation & Showcase",
+      status: "empty",
+      date:   "",
+      notes:  "",
+    },
+  ],
+
+  /* ── CAPSTONE PROJECT ────────────────────────────── */
+  capstone: {
+    title: "Smart Surveillance and Access Control System",
+    desc:  "This project is a smart surveillance and access control system built to provide high-quality security at a price point that actually works for people. By using affordable hardware like Raspberry Pi or ESP32 controllers, solenoid locks, and even repurposed webcams, it delivers professional-grade protection without the massive market markup. Imagine being able to leave your heavy luggage in a secure locker room in the CBD, knowing it's protected by RFID or facial recognition, while you go about your business freely? I'm sure some people who leave their items at supermarkets would not feel the need to anymore. Whether it’s for these urban locker hubs, home security, or e-commerce delivery points, this project aims to make safety and convenience accessible to everyone. It bridges the gap between expensive proprietary systems and local needs, offering a remotely-accessible platform that proves security doesn't have to be a luxury.",
+
 };
+/* ============================================================
+   END OF EDITABLE DATA — don't touch anything below this line
+   ============================================================ */
 
-function render(){
-  document.getElementById("name").value=data.name;
-  document.getElementById("about").value=data.about;
-  document.getElementById("project").value=data.project;
-  document.getElementById("desc").value=data.desc;
 
-  let weeksDiv=document.getElementById("weeks");
-  weeksDiv.innerHTML="";
+// Render profile
+document.getElementById("el-name").textContent  = DATA.name;
+document.getElementById("el-about").textContent = DATA.about;
 
-  let done=0;
+// Render capstone
+document.getElementById("el-cap-title").textContent = DATA.capstone.title;
+document.getElementById("el-cap-desc").textContent  = DATA.capstone.desc;
 
-  data.weeks.forEach((w,i)=>{
-    if(w.done) done++;
+// Render weeks
+const list = document.getElementById("week-list");
+let doneCount = 0;
 
-    let div=document.createElement("div");
-    div.className="week";
-    div.innerHTML=`
-      <input value="${w.topic}" onchange="update(${i},'topic',this.value)">
-      <label>
-        <input type="checkbox" ${w.done?"checked":""} onchange="update(${i},'done',this.checked)">
-        Completed
-      </label>
-    `;
-    weeksDiv.appendChild(div);
+DATA.weeks.forEach((w, i) => {
+  const s   = w.status || "empty";
+  const cls = s === "done" ? "done" : s === "partial" ? "partial" : "";
+  if (s === "done") doneCount++;
+
+  const [bc, bl] = s === "done"
+    ? ["bdone",    "Complete"]
+    : s === "partial"
+    ? ["bpartial", "In Progress"]
+    : ["bempty",   "Upcoming"];
+
+  const hasNotes = w.notes && w.notes.trim().length > 0;
+  const dateStr  = w.date ? `📅 ${w.date}` : "";
+
+  const item = document.createElement("div");
+  item.className = "week-item " + cls;
+
+  item.innerHTML = `
+    <div class="week-head">
+      <span class="week-num">W${String(i + 1).padStart(2, "0")}</span>
+      <span class="week-topic">${w.topic}</span>
+      <span class="week-badge ${bc}">${bl}</span>
+      <span class="week-chevron">▾</span>
+    </div>
+    <div class="week-body">
+      ${dateStr ? `<div class="week-date">${dateStr}</div>` : ""}
+      <div class="week-notes ${hasNotes ? "" : "empty"}">${
+        hasNotes ? w.notes : "No notes yet."
+      }</div>
+    </div>
+  `;
+
+  item.querySelector(".week-head").addEventListener("click", () => {
+    item.classList.toggle("open");
   });
 
-  document.getElementById("bar").style.width=(done/14*100)+"%";
-}
+  list.appendChild(item);
+});
 
-function update(i,key,val){
-  data.weeks[i][key]=val;
-  autoSave();
-  render();
-}
-
-function save(){
-  data.name=document.getElementById("name").value;
-  data.about=document.getElementById("about").value;
-  data.project=document.getElementById("project").value;
-  data.desc=document.getElementById("desc").value;
-
-  localStorage.setItem("iot-simple",JSON.stringify(data));
-}
-
-let timer;
-function autoSave(){
-  clearTimeout(timer);
-  timer=setTimeout(save,500);
-}
-
-render();
+// Progress bar
+document.getElementById("done-n").textContent     = doneCount;
+document.getElementById("prog-fill").style.width  = (doneCount / 14 * 100) + "%";
 </script>
-
 </body>
 </html>
