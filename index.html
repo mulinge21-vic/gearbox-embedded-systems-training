@@ -3,354 +3,780 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>IoT Learning Journal — Victor Mulinge</title>
+<title>Victor Mulinge — Gearbox Academy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,600;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
 :root {
-  --bg:     #0b0f1a;
-  --card:   #111827;
-  --card2:  #151f30;
-  --accent: #00e5c0;
-  --orange: #fb923c;
-  --text:   #e2e8f0;
-  --muted:  #64748b;
-  --border: #1e293b;
+  --bg: #0b0c0f;
+  --surface: #111318;
+  --card: #16181e;
+  --border: #22252e;
+  --accent: #c8ff00;
+  --accent2: #00d4ff;
+  --accent3: #ff4d6d;
+  --text: #e8eaf0;
+  --muted: #5a5f72;
+  --mono: 'Space Mono', monospace;
+  --head: 'Syne', sans-serif;
+  --body: 'DM Sans', sans-serif;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: 'DM Sans', sans-serif;
   background: var(--bg);
   color: var(--text);
-  line-height: 1.6;
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
 }
+
+/* ── Noise texture overlay ── */
 body::before {
   content: '';
-  position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  background-image: radial-gradient(circle, #1e293b 1px, transparent 1px);
-  background-size: 28px 28px;
-  opacity: .4;
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.5;
 }
-.wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 20px 80px; }
 
-/* HEADER */
-.site-header { padding: 52px 0 36px; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
-.eyebrow {
-  font-family: 'DM Mono', monospace;
-  font-size: .72rem; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 10px;
-  display: flex; align-items: center; gap: 8px;
+/* ── Nav ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 40px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(11,12,15,0.85);
+  backdrop-filter: blur(12px);
 }
-.eyebrow::before { content: ''; display: inline-block; width: 22px; height: 1px; background: var(--accent); }
-.site-header h1 {
-  font-size: clamp(1.9rem, 4vw, 3rem);
-  font-weight: 700; letter-spacing: -.02em; line-height: 1.1; margin-bottom: 10px;
+.nav-logo {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-decoration: none;
 }
-.site-header h1 span { color: var(--accent); }
-.site-header p { font-size: .9rem; color: var(--muted); max-width: 420px; }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--accent); }
+.nav-links a.active { color: var(--accent); }
 
-/* CARDS */
-.card { background: var(--card); border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
-.card-title {
-  font-family: 'DM Mono', monospace;
-  font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 18px;
-  display: flex; align-items: center; gap: 10px;
-}
-.card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+/* ── SPA Page Container ── */
+.page-view { display: none; min-height: 100vh; padding-top: 60px; }
+.page-view.active-page { display: block; animation: fadeIn 0.4s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* PROFILE */
-.profile-name {
-  font-size: 1.25rem; font-weight: 700; margin-bottom: 6px;
+/* ── Hero ── */
+.hero {
+  min-height: calc(100vh - 60px);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 60px 40px;
+  position: relative; overflow: hidden;
 }
-.profile-about { font-size: .9rem; color: var(--muted); line-height: 1.75; }
+.hero::before {
+  content: 'VM';
+  position: absolute; right: -40px; top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--head); font-size: clamp(200px, 30vw, 500px); font-weight: 800;
+  color: rgba(200,255,0,0.03); line-height: 1; pointer-events: none; user-select: none;
+}
+.hero-tag {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 4px; color: var(--accent);
+  margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+}
+.hero-tag::before { content: ''; display: inline-block; width: 40px; height: 1px; background: var(--accent); }
+.hero h1 { font-family: var(--head); font-size: clamp(48px, 8vw, 100px); font-weight: 800; line-height: 0.95; letter-spacing: -3px; margin-bottom: 32px; }
+.hero h1 span { color: var(--accent); }
+.hero-desc { max-width: 560px; font-size: 16px; color: var(--muted); margin-bottom: 48px; line-height: 1.8; }
+.hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
 
-/* PROGRESS */
-.prog-header {
-  display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px;
+/* ── Buttons ── */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: var(--accent); color: #000;
+  font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-decoration: none; text-transform: uppercase;
+  transition: all 0.2s; border: 2px solid var(--accent); cursor: pointer;
 }
-.prog-label { font-size: .85rem; color: var(--muted); }
-.prog-count { font-family: 'DM Mono', monospace; font-size: .78rem; color: var(--accent); }
-.prog-bar { height: 4px; background: var(--border); overflow: hidden; margin-bottom: 24px; }
-.prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #34d399); transition: width .7s cubic-bezier(.4,0,.2,1); }
+.btn-primary:hover { background: transparent; color: var(--accent); }
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: transparent; color: var(--text);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-decoration: none; text-transform: uppercase;
+  border: 1px solid var(--border); transition: all 0.2s; cursor: pointer;
+}
+.btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
 
-/* WEEK ITEMS */
-.week-list { display: flex; flex-direction: column; gap: 8px; }
-.week-item {
-  background: var(--card2);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--border);
-  overflow: hidden;
-  transition: border-color .2s;
-}
-.week-item.done    { border-left-color: var(--accent); background: rgba(0,229,192,.05); }
-.week-item.partial { border-left-color: var(--orange); }
+/* ── Stats bar ── */
+.stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.stat { padding: 40px; border-right: 1px solid var(--border); position: relative; overflow: hidden; }
+.stat:last-child { border-right: none; }
+.stat-num { font-family: var(--head); font-size: 56px; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 8px; }
+.stat-label { font-family: var(--mono); font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
 
-.week-head {
-  display: flex; align-items: center; gap: 12px;
-  padding: 11px 14px;
-  cursor: pointer; user-select: none;
-}
-.week-num {
-  font-family: 'DM Mono', monospace;
-  font-size: .68rem; color: var(--muted); white-space: nowrap; flex-shrink: 0;
-}
-.week-topic {
-  flex: 1; font-size: .9rem; font-weight: 600; color: var(--text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.week-badge {
-  font-family: 'DM Mono', monospace;
-  font-size: .6rem; letter-spacing: .07em; text-transform: uppercase;
-  padding: 2px 7px; border: 1px solid currentColor; white-space: nowrap; flex-shrink: 0;
-}
-.week-badge.bempty   { color: var(--muted); }
-.week-badge.bpartial { color: var(--orange); }
-.week-badge.bdone    { color: var(--accent); }
-.week-chevron { flex-shrink: 0; color: var(--muted); font-size: .75rem; transition: transform .25s; }
-.week-item.open .week-chevron { transform: rotate(180deg); }
+/* ── Grid cards ── */
+.cards-section { padding: 100px 40px; }
+.section-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 4px; color: var(--accent); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+.section-tag::before { content: ''; display: inline-block; width: 24px; height: 1px; background: var(--accent); }
+.section-title { font-family: var(--head); font-size: clamp(32px, 5vw, 56px); font-weight: 800; letter-spacing: -2px; margin-bottom: 60px; line-height: 1; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.card { background: var(--card); padding: 40px; transition: background 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
+.card:hover { background: var(--surface); }
+.card-icon { font-size: 28px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border: 1px solid var(--border); background: var(--surface); }
+.card h3 { font-family: var(--head); font-size: 20px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px; }
+.card p { color: var(--muted); font-size: 14px; flex: 1; }
+.card-arrow { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-top: 24px; text-decoration: none; }
+.card-arrow::after { content: '→'; transition: transform 0.2s; }
+.card:hover .card-arrow::after { transform: translateX(4px); }
 
-.week-body {
-  display: none;
-  padding: 14px 14px 16px;
-  border-top: 1px solid var(--border);
-}
-.week-item.open .week-body { display: block; }
+/* ── Featured card ── */
+.featured-card { background: var(--card); border: 1px solid var(--border); padding: 56px; position: relative; overflow: hidden; margin: 0 40px 100px; }
+.featured-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.featured-card::after { content: 'CAPSTONE'; position: absolute; top: 24px; right: 24px; font-family: var(--mono); font-size: 9px; letter-spacing: 3px; color: var(--accent); border: 1px solid var(--accent); padding: 4px 10px; }
+.featured-card h2 { font-family: var(--head); font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -2px; margin-bottom: 16px; line-height: 1; }
+.featured-card h2 span { color: var(--accent); }
+.featured-card p { color: var(--muted); max-width: 600px; margin-bottom: 32px; font-size: 15px; }
+.tech-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+.tech-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; padding: 4px 12px; border: 1px solid var(--border); color: var(--muted); }
+.tech-tag.highlight { border-color: var(--accent); color: var(--accent); }
 
-.week-date {
-  font-family: 'DM Mono', monospace;
-  font-size: .68rem; color: var(--muted); margin-bottom: 10px;
-}
-.week-notes { font-size: .88rem; color: var(--text); line-height: 1.75; white-space: pre-wrap; }
-.week-notes.empty { color: var(--muted); font-style: italic; }
+/* ── Terminal block ── */
+.terminal { background: #0d0f12; border: 1px solid var(--border); padding: 32px; font-family: var(--mono); font-size: 13px; line-height: 2; margin-top: 40px; position: relative; }
+.terminal::before { content: '● ● ●'; position: absolute; top: 12px; left: 16px; font-size: 10px; color: var(--muted); letter-spacing: 4px; }
+.terminal-line { color: var(--muted); }
+.terminal-line .prompt { color: var(--accent); }
+.terminal-line .cmd { color: var(--text); }
+.terminal-line .output { color: var(--accent2); }
+.terminal-line .success { color: #00ff9d; }
+.cursor { display: inline-block; width: 8px; height: 14px; background: var(--accent); animation: blink 1s infinite; vertical-align: middle; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-/* CAPSTONE */
-.cap-title   { font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; }
-.cap-desc    { font-size: .9rem; color: var(--muted); line-height: 1.8; white-space: pre-wrap; }
+/* ── Sub-Pages Header ── */
+.page-header { padding: 100px 40px 60px; border-bottom: 1px solid var(--border); background: var(--surface); text-align: center; }
+.page-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 4px; color: var(--accent); margin-bottom: 24px; display: inline-flex; align-items: center; gap: 12px; text-transform: uppercase; }
+.page-tag::before, .page-tag::after { content: ''; display: inline-block; width: 40px; height: 1px; background: var(--accent); }
+.page-header h1 { font-family: var(--head); font-size: clamp(32px, 6vw, 64px); font-weight: 800; color: var(--text); line-height: 1.1; letter-spacing: -2px; margin-bottom: 24px; }
+.page-header h1 span { color: var(--accent2); }
 
-/* FOOTER */
-footer {
-  border-top: 1px solid var(--border);
-  padding: 24px 0;
-  font-family: 'DM Mono', monospace;
-  font-size: .67rem; color: var(--muted); letter-spacing: .08em;
-  text-align: center;
+/* ── Document Container ── */
+.document-container { max-width: 900px; margin: 0 auto; padding: 80px 40px; color: var(--muted); }
+.document-container h2 { font-family: var(--head); font-size: 32px; font-weight: 700; color: var(--text); letter-spacing: -1px; margin: 60px 0 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.document-container h3 { font-family: var(--head); font-size: 22px; font-weight: 700; color: var(--text); margin: 40px 0 16px; }
+.document-container p { margin-bottom: 24px; }
+.document-container ul { margin-bottom: 32px; padding-left: 24px; }
+.document-container li { margin-bottom: 12px; position: relative; list-style-type: none; }
+.document-container li::before { content: '>'; position: absolute; left: -24px; color: var(--accent); font-family: var(--mono); font-weight: bold; }
+
+/* ── Meta Info Grid ── */
+.meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 60px; background: var(--card); border: 1px solid var(--border); padding: 32px; }
+.meta-item { display: flex; flex-direction: column; gap: 8px; }
+.meta-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+.meta-value { color: var(--text); font-weight: 500; font-size: 15px; }
+
+/* ── Tables ── */
+.table-responsive { width: 100%; overflow-x: auto; margin: 32px 0; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+th { background: var(--surface); font-family: var(--mono); font-size: 11px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; font-weight: 400; }
+td { font-size: 14px; color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+/* ── Terminal Accordion (Reports) ── */
+.terminal-accordion { margin-bottom: 16px; border: 1px solid var(--border); background: var(--surface); }
+.terminal-accordion summary { padding: 24px; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; font-family: var(--head); font-size: 20px; font-weight: 700; color: var(--text); user-select: none; }
+.terminal-accordion summary::-webkit-details-marker { display: none; }
+.terminal-accordion summary::after { content: '[+]'; font-family: var(--mono); font-size: 14px; color: var(--accent); font-weight: 400; letter-spacing: 2px; }
+.terminal-accordion[open] summary::after { content: '[-]'; color: var(--accent3); }
+.terminal-accordion[open] summary { border-bottom: 1px solid var(--border); background: var(--card); color: var(--accent); }
+.term-date { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-right: 16px; font-weight: 400; }
+.accordion-content { padding: 32px 24px; background: var(--bg); color: var(--muted); }
+.takeaway { margin-top: 24px; padding: 16px; border-left: 2px solid var(--accent); background: rgba(200,255,0,0.03); font-family: var(--mono); font-size: 13px; color: var(--text); }
+.takeaway span { color: var(--accent); margin-right: 8px; }
+
+/* ── Footer ── */
+footer { border-top: 1px solid var(--border); padding: 40px; display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+footer a { color: var(--accent); text-decoration: none; }
+
+@media(max-width: 768px) {
+  nav { padding: 16px 20px; }
+  .nav-links { gap: 16px; }
+  .hero, .cards-section { padding-left: 20px; padding-right: 20px; }
+  .stats-bar { grid-template-columns: 1fr; }
+  .stat { border-right: none; border-bottom: 1px solid var(--border); }
+  footer { flex-direction: column; gap: 12px; text-align: center; }
+  .featured-card { margin: 0 20px 60px; padding: 32px 24px; }
+  .page-header { padding: 100px 20px 40px; }
+  .document-container { padding: 40px 20px; }
+  .terminal-accordion summary { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .terminal-accordion summary::after { position: absolute; right: 20px; top: 24px; }
+  .terminal-accordion { position: relative; }
 }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <header class="site-header">
-    <div class="eyebrow">Gearbox Nairobi · IoT &amp; Embedded Systems</div>
-    <h1>IoT Learning<br><span>Journal</span></h1>
-    <p>14 weeks of sensors, protocols, cloud platforms, and hands-on building.</p>
-  </header>
+<nav>
+  <a href="#home" class="nav-logo">VM_</a>
+  <ul class="nav-links">
+    <li><a href="#home" class="nav-link active">Home</a></li>
+    <li><a href="#about" class="nav-link">About</a></li>
+    <li><a href="#reports" class="nav-link">Reports</a></li>
+    <li><a href="#capstone" class="nav-link">Capstone</a></li>
+  </ul>
+</nav>
 
-  <!-- PROFILE -->
-  <div class="card">
-    <div class="card-title">01 · Profile</div>
-    <div class="profile-name" id="el-name"></div>
-    <div class="profile-about" id="el-about"></div>
-  </div>
-
-  <!-- PROGRESS -->
-  <div class="card">
-    <div class="card-title">02 · Weekly Progress</div>
-    <div class="prog-header">
-      <span class="prog-label">Completion</span>
-      <span class="prog-count"><span id="done-n">0</span> / 14 weeks</span>
+<!-- ==========================================
+     HOME PAGE
+=========================================== -->
+<div id="home" class="page-view active-page">
+  <section class="hero">
+    <div class="hero-tag">Gearbox Academy — IoT &amp; Embedded Systems</div>
+    <h1>Victor<br/><span>Mulinge</span></h1>
+    <p class="hero-desc">
+      Tracking my embedded systems journey through Gearbox Academy — weekly reports,
+      hands-on projects, and a capstone that puts it all together.
+    </p>
+    <div class="hero-ctas">
+      <a href="#reports" class="btn-primary">Weekly Reports →</a>
+      <a href="#capstone" class="btn-secondary">Capstone Project</a>
     </div>
-    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
-    <div class="week-list" id="week-list"></div>
+
+    <div class="terminal" style="max-width:600px;">
+      <div class="terminal-line"><span class="prompt">vicpod@vicpi:~$</span> <span class="cmd">whoami</span></div>
+      <div class="terminal-line"><span class="output">Victor Mulinge — IoT Engineer in training</span></div>
+      <div class="terminal-line"><span class="prompt">vicpod@vicpi:~$</span> <span class="cmd">cat status.txt</span></div>
+      <div class="terminal-line"><span class="success">✓ VicPi Security — capstone project LIVE</span></div>
+      <div class="terminal-line"><span class="success">✓ Face recognition, PIN, relay control running</span></div>
+      <div class="terminal-line"><span class="prompt">vicpod@vicpi:~$</span> <span class="cursor"></span></div>
+    </div>
+  </section>
+
+  <div class="stats-bar" id="stats-section">
+    <div class="stat">
+      <div class="stat-num" id="counter-weeks">0</div>
+      <div class="stat-label">Weeks Completed</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="counter-reports">0</div>
+      <div class="stat-label">Reports Submitted</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="counter-projects">0</div>
+      <div class="stat-label">Projects Built</div>
+    </div>
   </div>
 
-  <!-- CAPSTONE -->
-  <div class="card">
-    <div class="card-title">03 · Capstone Project</div>
-    <div class="cap-title" id="el-cap-title"></div>
-    <div class="cap-desc"  id="el-cap-desc"></div>
-  </div>
+  <section class="cards-section">
+    <div class="section-tag">Explore</div>
+    <h2 class="section-title">What's here</h2>
+    <div class="cards-grid">
+      <a href="#about" class="card">
+        <div class="card-icon">👤</div>
+        <h3>About Me</h3>
+        <p>Background, skills, and what brought me to embedded systems and IoT development.</p>
+        <span class="card-arrow">Read more</span>
+      </a>
+      <a href="#reports" class="card">
+        <div class="card-icon">📋</div>
+        <h3>Weekly Reports</h3>
+        <p>Progress reports from each week of the Gearbox Academy IoT curriculum, organised chronologically.</p>
+        <span class="card-arrow">View reports</span>
+      </a>
+      <a href="#capstone" class="card">
+        <div class="card-icon">🔐</div>
+        <h3>Capstone Project</h3>
+        <p>VicPi Security — a smart surveillance and access control system built on Raspberry Pi 4.</p>
+        <span class="card-arrow">See project</span>
+      </a>
+    </div>
+  </section>
 
+  <div class="featured-card">
+    <h2>VicPi <span>Security</span></h2>
+    <p>A fully integrated smart home and office surveillance and access control system — face recognition, keypad PIN, remote dashboard, real-time Telegram alerts, and electromagnetic door lock control. All on a Raspberry Pi 4.</p>
+    <div class="tech-tags">
+      <span class="tech-tag highlight">Python 3.13</span>
+      <span class="tech-tag highlight">FastAPI</span>
+      <span class="tech-tag highlight">OpenCV LBPH</span>
+      <span class="tech-tag">Picamera2</span>
+      <span class="tech-tag">RPi.GPIO</span>
+      <span class="tech-tag">SQLite</span>
+      <span class="tech-tag">WebSocket</span>
+      <span class="tech-tag">Telegram API</span>
+      <span class="tech-tag">Cloudflare Tunnel</span>
+      <span class="tech-tag">PWA Dashboard</span>
+    </div>
+    <a href="#capstone" class="btn-primary">View Full Proposal →</a>
+  </div>
 </div>
 
-<footer>Victor Mulinge · IoT Learning Journal · Gearbox Nairobi · 2025</footer>
+<!-- ==========================================
+     ABOUT PAGE
+=========================================== -->
+<div id="about" class="page-view">
+  <header class="page-header">
+    <div class="page-tag">Background &amp; Skills</div>
+    <h1>About <span>Me</span></h1>
+  </header>
+  <main class="document-container">
+    <h2>Victor Mulinge</h2>
+    <p>I am a 5th-year Electrical and Electronic Engineering student at the University of Nairobi with a strong focus on control systems, telecommunications infrastructure, and IoT implementations.</p>
+    <p>My technical expertise spans across physical infrastructure and software logic. I have hands-on experience in OSP fiber construction, utilizing MATLAB for complex system stability analysis, and bridging the gap to modern IoT via hardware platforms like the Raspberry Pi and ESP32 microcontrollers.</p>
+    <p>I am passionate about engineering practical, hardware-integrated solutions that merge physical infrastructure with smart technology, moving beyond theoretical models to build physical systems that solve real-world problems.</p>
 
+    <h3>Technical Stack</h3>
+    <div class="tech-tags" style="margin-top: 20px;">
+      <span class="tech-tag highlight">Python</span>
+      <span class="tech-tag highlight">Embedded Linux (Raspberry Pi OS)</span>
+      <span class="tech-tag highlight">Microcontrollers (ESP32)</span>
+      <span class="tech-tag highlight">Circuit Design (Proteus)</span>
+      <span class="tech-tag">OpenCV / Computer Vision</span>
+      <span class="tech-tag">MATLAB</span>
+    </div>
+  </main>
+</div>
+
+<!-- ==========================================
+     REPORTS PAGE
+=========================================== -->
+<div id="reports" class="page-view">
+  <header class="page-header">
+    <div class="page-tag">Gearbox Progress</div>
+    <h1>Weekly <span>Reports</span></h1>
+    <p style="color: var(--muted); font-size: 16px;">Documenting hands-on learning and prototyping across the 10-week program.</p>
+  </header>
+  <main class="document-container">
+
+    <details class="terminal-accordion">
+      <summary><span class="term-date">Week 10</span> XX</summary>
+      <div class="accordion-content">
+        <p>YY</p>
+        <div class="takeaway"><span>></span> <strong>Key Takeaway:</strong> ZZ</div>
+      </div>
+    </details>
+
+    <details class="terminal-accordion">
+      <summary><span class="term-date">Week 09</span> XX</summary>
+      <div class="accordion-content">
+        <p>YY</p>
+        <div class="takeaway"><span>></span> <strong>Key Takeaway:</strong> ZZ</div>
+      </div>
+    </details>
+
+    <details class="terminal-accordion">
+      <summary><span class="term-date">Week 08</span> XX</summary>
+      <div class="accordion-content">
+        <p>YY</p>
+        <div class="takeaway"><span>></span> <strong>Key Takeaway:</strong> ZZ</div>
+      </div>
+    </details>
+
+    <details class="terminal-accordion">
+      <summary><span class="term-date">Week 07</span> XX</summary>
+      <div class="accordion-content">
+        <p>YY</p>
+        <div class="takeaway"><span>></span> <strong>Key Takeaway:</strong> ZZ</div>
+      </div>
+    </details>
+
+    <details class="terminal-accordion">
+      <summary><span class="term-date">Week 06</span> XX</summary>
+      <div class="accordion-content">
+        <p>YY</p>
+        <div class="takeaway"><span>></span> <strong>Key Takeaway:</strong> ZZ</div>
+      </div>
+    </details>
+
+    <details class="terminal-accordion">
+      <summary><span class="term-date">Week 05</span> XX</summary>
+      <div class="accordion-content">
+        <p>YY</p>
+        <div class="takeaway"><span>></span> <strong>Key Takeaway:</strong> ZZ</div>
+      </div>
+    </details>
+
+    <details class="terminal-accordion">
+      <summary><span class="term-date">Week 04</span> XX</summary>
+      <div class="accordion-content">
+        <p>YY</p>
+        <div class="takeaway"><span>></span> <strong>Key Takeaway:</strong> ZZ</div>
+      </div>
+    </details>
+
+    <details class="terminal-accordion">
+      <summary><span class="term-date">Week 03</span> XX</summary>
+      <div class="accordion-content">
+        <p>YY</p>
+        <div class="takeaway"><span>></span> <strong>Key Takeaway:</strong> ZZ</div>
+      </div>
+    </details>
+
+    <details class="terminal-accordion">
+      <summary><span class="term-date">Week 02</span> XX</summary>
+      <div class="accordion-content">
+        <p>YY</p>
+        <div class="takeaway"><span>></span> <strong>Key Takeaway:</strong> ZZ</div>
+      </div>
+    </details>
+
+    <details class="terminal-accordion">
+      <summary><span class="term-date">Week 01</span> XX</summary>
+      <div class="accordion-content">
+        <p>YY</p>
+        <div class="takeaway"><span>></span> <strong>Key Takeaway:</strong> ZZ</div>
+      </div>
+    </details>
+
+  </main>
+</div>
+
+<!-- ==========================================
+     CAPSTONE PAGE  (full content from capstone.html)
+=========================================== -->
+<div id="capstone" class="page-view">
+  <header class="page-header">
+    <div class="page-tag">Final Year Project Proposal</div>
+    <h1>VicPi <span>Security</span></h1>
+    <p style="color: var(--muted); font-size: 18px;">A Smart Home and Office Surveillance and Access Control System</p>
+  </header>
+
+  <main class="document-container">
+
+    <div class="meta-grid">
+      <div class="meta-item">
+        <span class="meta-label">Student Name</span>
+        <span class="meta-value">Victor Mulinge (vicpod)</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Submission Date</span>
+        <span class="meta-value">April 2026</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Hardware Platform</span>
+        <span class="meta-value">Raspberry Pi 4 Model B (4GB)</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Category</span>
+        <span class="meta-value">IoT / Embedded Systems / Cybersecurity</span>
+      </div>
+    </div>
+
+    <h2>1. Introduction</h2>
+    <p>This project is a smart surveillance and access control system built to provide high-quality security at a price point that actually works for people. By using affordable hardware like Raspberry Pi or ESP32 controllers, solenoid locks, and even repurposed webcams, it delivers professional-grade protection without the massive market markup. Imagine being able to leave your heavy luggage in a secure locker room in the CBD, knowing it's protected by RFID or facial recognition, while you go about your business freely? Whether it's for urban locker hubs, home security, or e-commerce delivery points, this project aims to make safety and convenience accessible to everyone. It bridges the gap between expensive proprietary systems and local needs, offering a remotely-accessible platform that proves security doesn't have to be a luxury.</p>
+    <p>The rapid growth of smart technology and the Internet of Things (IoT) has created new opportunities for affordable, intelligent security solutions. Traditional surveillance and access control systems — relying on passive CCTV cameras, mechanical locks, and dedicated DVR hardware — are increasingly inadequate for modern security requirements. They lack intelligence, generate enormous volumes of unreviewed footage, cannot respond autonomously to security events, and require significant financial investment for installation and maintenance.</p>
+    <p>VicPi Security addresses these limitations by delivering a fully integrated smart surveillance and access control system built on the Raspberry Pi 4 — a low-cost, high-performance single-board computer. The system combines live video surveillance, AI-powered facial recognition, multi-method physical access control, real-time push notifications, and a remotely accessible web dashboard into a single unified platform. By leveraging open-source software and commodity hardware, VicPi Security achieves capabilities typically reserved for enterprise-grade systems, at a fraction of the cost.</p>
+
+    <h2>2. Problem Statement</h2>
+    <p>Current surveillance and access control solutions in the market present several critical shortcomings that limit their practical utility for home and small office environments:</p>
+    <ul>
+      <li>Traditional CCTV systems are passive — they record continuously without intelligence, requiring manual review of footage after incidents rather than preventing them.</li>
+      <li>Standalone access control systems (keypads, RFID readers) operate independently from surveillance cameras, providing no visual verification of who is attempting access.</li>
+      <li>Commercial integrated systems that combine surveillance and access control are prohibitively expensive, typically requiring professional installation and ongoing licensing fees in the thousands of dollars.</li>
+      <li>Existing solutions do not provide real-time alerts with visual evidence — property owners are notified of incidents only after reviewing recorded footage.</li>
+      <li>Remote monitoring and control capabilities in affordable systems are limited, preventing property owners from managing access from outside the premises.</li>
+      <li>Most systems fail gracefully — a power cut disables the entire security infrastructure without automatic recovery.</li>
+    </ul>
+
+    <h2>3. Proposed Solution</h2>
+    <p>VicPi Security proposes the design and implementation of a multi-layered smart security system built on the Raspberry Pi 4 platform. The system integrates the following capabilities into a single unified platform:</p>
+
+    <h3>3.1 Surveillance</h3>
+    <p>A Pi Camera Module streams live MJPEG video to a web-based dashboard accessible from any device on the local network or remotely via Cloudflare Tunnel. The camera doubles as the sensor for the face recognition engine, eliminating the need for separate hardware.</p>
+
+    <h3>3.2 Multi-Method Access Control</h3>
+    <p>Three independent access methods are supported, providing redundancy and flexibility. Face recognition using the OpenCV LBPH algorithm identifies enrolled individuals and automatically triggers door unlock. A 4×4 membrane keypad allows PIN-based entry for situations where face recognition is impractical. A remote unlock button on the web dashboard enables administrators to grant access from anywhere in the world.</p>
+
+    <h3>3.3 Physical Hardware Integration</h3>
+    <p>A relay module connected to GPIO 23 controls an electromagnetic door lock via a DC buck converter. Visual feedback is provided through green and red LEDs indicating access granted and denied respectively. An active buzzer driven through a 2N3904 NPN transistor provides audio feedback — two tones for doorbell, three short beeps for access denied. A push button doorbell simultaneously rings the buzzer, triggers face recognition, takes a visitor snapshot, and dispatches a Telegram notification.</p>
+
+    <h3>3.4 Real-Time Notifications</h3>
+    <p>The Telegram Bot API is integrated to deliver push notifications with camera snapshots to the administrator's phone within seconds of any access event — doorbell press, successful access, or failed access attempt. This transforms the system from a passive recorder into an active security alert system.</p>
+
+    <h3>3.5 Web Dashboard</h3>
+    <p>A Progressive Web Application (PWA) dashboard built with HTML5, CSS3, and JavaScript provides a professional monitoring interface featuring a live camera feed, real-time access log with WebSocket updates, face enrolment interface, access control buttons, event statistics, and dark-themed industrial UI. The PWA is installable on mobile devices as a native-like app without App Store submission.</p>
+
+    <h3>3.6 Remote Access</h3>
+    <p>Cloudflare Tunnel creates a secure encrypted connection between the Pi and Cloudflare's global edge network, exposing the dashboard and API via a public HTTPS URL accessible from anywhere in the world without firewall configuration or port forwarding.</p>
+
+    <h3>3.7 System Resilience</h3>
+    <p>Both the backend API server and dashboard are configured as systemd services, ensuring automatic startup on boot and automatic recovery from crashes. A static IP address eliminates URL changes across reboots, and the SQLite database persists all access logs to disk for historical review.</p>
+
+    <h2>4. Project Objectives</h2>
+    <h3>4.1 Primary Objectives</h3>
+    <ul>
+      <li>To design and implement a multi-method access control system supporting face recognition, keypad PIN entry, and remote app unlock on a Raspberry Pi 4 platform.</li>
+      <li>To integrate live video surveillance with access control in a unified system, eliminating the need for separate surveillance and access hardware.</li>
+      <li>To develop a real-time web dashboard accessible from local and remote networks that provides live camera monitoring, event logging, and access control capabilities.</li>
+      <li>To implement automated push notification delivery with camera snapshots via Telegram for all security events.</li>
+      <li>To deploy the system with automatic boot recovery ensuring continuous operation without manual intervention after power interruptions.</li>
+    </ul>
+
+    <h3>4.2 Secondary Objectives</h3>
+    <ul>
+      <li>To evaluate the performance of the OpenCV LBPH face recognition algorithm in a real-world embedded deployment environment.</li>
+      <li>To demonstrate the viability of low-cost commodity hardware as a platform for intelligent security systems traditionally requiring expensive proprietary equipment.</li>
+      <li>To document the design, implementation, and testing process in a manner suitable for replication and further development.</li>
+    </ul>
+
+    <h2>5. IoT Technologies and Components</h2>
+
+    <h3>5.1 Hardware Components</h3>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>Component</th><th>Specification</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Raspberry Pi 4 Model B</td><td>4GB RAM, 1.8GHz quad-core ARM</td><td>Central processing unit</td></tr>
+          <tr><td>Pi Camera Module (NoIR)</td><td>OV5647, 640×480 @ 20fps</td><td>Surveillance and face capture</td></tr>
+          <tr><td>4×4 Membrane Keypad</td><td>GPIO matrix scanning</td><td>Physical PIN entry</td></tr>
+          <tr><td>1-Channel Relay Module</td><td>5V, 10A rated</td><td>Door lock control</td></tr>
+          <tr><td>Electromagnetic Door Lock</td><td>12V DC solenoid</td><td>Physical door locking</td></tr>
+          <tr><td>Push Button</td><td>Momentary, GPIO 10</td><td>Doorbell and face scan trigger</td></tr>
+          <tr><td>Active Buzzer</td><td>5V via 2N3904 transistor</td><td>Audio feedback</td></tr>
+          <tr><td>Green LED</td><td>GPIO 25, 150Ω resistor</td><td>Access granted indicator</td></tr>
+          <tr><td>Red LED</td><td>GPIO 8, 150Ω resistor</td><td>Access denied indicator</td></tr>
+          <tr><td>DC Buck Converter</td><td>12V → door lock voltage</td><td>Voltage regulation</td></tr>
+          <tr><td>2N3904 NPN Transistor</td><td>1.5kΩ base resistor</td><td>Buzzer current amplification</td></tr>
+          <tr><td>Veroboard HAT</td><td>24×18 holes, 40-pin header</td><td>Component integration board</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>5.2 Software Stack</h3>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>Technology</th><th>Version</th><th>Role</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Raspberry Pi OS</td><td>Debian Trixie (64-bit)</td><td>Operating system</td></tr>
+          <tr><td>Python</td><td>3.13</td><td>Primary programming language</td></tr>
+          <tr><td>FastAPI + Uvicorn</td><td>0.111.0</td><td>REST API and WebSocket server</td></tr>
+          <tr><td>Picamera2</td><td>Latest</td><td>Camera interface library</td></tr>
+          <tr><td>OpenCV + LBPH</td><td>4.9.0</td><td>Face detection and recognition</td></tr>
+          <tr><td>SQLite + SQLAlchemy</td><td>2.0</td><td>Access event database</td></tr>
+          <tr><td>RPi.GPIO</td><td>0.7.1</td><td>GPIO hardware control</td></tr>
+          <tr><td>python-jose (JWT)</td><td>3.3.0</td><td>API authentication</td></tr>
+          <tr><td>Telegram Bot API</td><td>REST</td><td>Push notifications with snapshots</td></tr>
+          <tr><td>Cloudflare Tunnel</td><td>2026.3.0</td><td>Secure remote access</td></tr>
+          <tr><td>HTML5 / CSS3 / JS</td><td>PWA</td><td>Web dashboard</td></tr>
+          <tr><td>systemd</td><td>Built-in</td><td>Auto-boot service management</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>6. System Architecture</h2>
+    <p>The VicPi Security system is structured around three architectural layers that communicate through well-defined interfaces:</p>
+    <ul>
+      <li><strong>Hardware Layer:</strong> The Raspberry Pi 4 and all peripheral components (camera, keypad, relay, LEDs, buzzer, door lock) form the physical sensing and actuation layer. GPIO pins provide the electrical interface between the Pi and all peripherals.</li>
+      <li><strong>Backend Layer:</strong> A Python FastAPI server running on the Pi manages all business logic — face recognition, PIN verification, GPIO control, database logging, WebSocket broadcasting, and Telegram notification dispatch. The server exposes a REST API on port 8000 and serves the dashboard on port 8080.</li>
+      <li><strong>Presentation Layer:</strong> The Progressive Web Application dashboard communicates with the backend via REST API calls and WebSocket connections, delivering live video, real-time event updates, and access control functionality to any connected device.</li>
+    </ul>
+    <p>Communication between layers uses standard protocols: HTTP/REST for API calls, WebSocket for real-time event streaming, MJPEG over HTTP for video streaming, and HTTPS via Cloudflare Tunnel for encrypted remote access.</p>
+
+    <h2>7. Expected Outcomes and Impact</h2>
+    <h3>7.1 Technical Outcomes</h3>
+    <ul>
+      <li>A fully functional integrated surveillance and access control system demonstrating real-time face recognition, multi-method door access, and automated security alerting on commodity embedded hardware.</li>
+      <li>An LBPH face recognition implementation achieving greater than 85% accuracy in controlled indoor environments on a resource-constrained ARM processor.</li>
+      <li>A remotely accessible web dashboard with sub-second real-time event updates via WebSocket, demonstrating practical IoT system design principles.</li>
+      <li>A documented, replicable system architecture that can serve as a foundation for further research and commercial development.</li>
+    </ul>
+
+    <h3>7.2 Market and Social Impact</h3>
+    <p>VicPi Security demonstrates that intelligent, integrated security technology is achievable at a component cost of approximately KES 15,000–25,000 — compared to tens of thousands of dollars for equivalent commercial enterprise systems. This democratisation of smart security technology has significant implications for small businesses, educational institutions, residential properties, and community facilities in markets where commercial enterprise security solutions are financially inaccessible. The project also demonstrates the broader applicability of single-board computer platforms for IoT applications beyond hobbyist use, contributing to the growing body of evidence supporting embedded Linux systems as viable platforms for production-grade intelligent systems.</p>
+
+    <h3>7.3 Academic Contribution</h3>
+    <ul>
+      <li>A comparative evaluation of face recognition algorithms (Eigenfaces, Fisherfaces, LBPH, deep learning) in the context of embedded real-time access control deployment.</li>
+      <li>Practical documentation of the challenges of deploying Python machine learning libraries on ARM64 hardware with Python 3.13, and the solutions employed.</li>
+      <li>A demonstrated integration pattern for combining computer vision, GPIO hardware control, REST APIs, WebSocket, and cloud tunnelling in a unified IoT application.</li>
+    </ul>
+
+    <h2>8. Project Timeline</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>Phase</th><th>Activities</th><th>Deliverable</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Phase 1<br/><span style="color:var(--accent2);font-size:12px;">Week 1–2</span></td>
+            <td>Hardware procurement, circuit design, component wiring, breadboard prototyping</td>
+            <td>Working hardware prototype on breadboard</td>
+          </tr>
+          <tr>
+            <td>Phase 2<br/><span style="color:var(--accent2);font-size:12px;">Week 3–4</span></td>
+            <td>OS setup, Python environment, camera integration, GPIO testing</td>
+            <td>Functional camera stream and GPIO control</td>
+          </tr>
+          <tr>
+            <td>Phase 3<br/><span style="color:var(--accent2);font-size:12px;">Week 5–6</span></td>
+            <td>FastAPI backend development, face recognition, PIN system, database</td>
+            <td>Working API with all access methods</td>
+          </tr>
+          <tr>
+            <td>Phase 4<br/><span style="color:var(--accent2);font-size:12px;">Week 7–8</span></td>
+            <td>Dashboard development, WebSocket, Telegram, Cloudflare Tunnel</td>
+            <td>Complete integrated system</td>
+          </tr>
+          <tr>
+            <td>Phase 5<br/><span style="color:var(--accent2);font-size:12px;">Week 9–10</span></td>
+            <td>Veroboard soldering, enclosure design, system testing</td>
+            <td>Polished physical prototype</td>
+          </tr>
+          <tr>
+            <td>Phase 6<br/><span style="color:var(--accent2);font-size:12px;">Week 11–12</span></td>
+            <td>Report writing, documentation, demo preparation</td>
+            <td>Final report and demonstration</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>9. Risk Assessment and Mitigation</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Library incompatibility (Python 3.13)</td>
+            <td style="color:#ffaa00;">High</td>
+            <td style="color:#ff4d6d;">High — blocks face recognition</td>
+            <td>Use OpenCV LBPH instead of TensorFlow-dependent DeepFace</td>
+          </tr>
+          <tr>
+            <td>Pi Camera not recognised by OpenCV</td>
+            <td style="color:#ffaa00;">High</td>
+            <td style="color:#ff4d6d;">High — no video stream</td>
+            <td>Use Picamera2 library instead of cv2.VideoCapture</td>
+          </tr>
+          <tr>
+            <td>GPIO component damage</td>
+            <td style="color:#00d4ff;">Medium</td>
+            <td style="color:#00d4ff;">Medium — replace component</td>
+            <td>Use resistors and transistors to protect GPIO pins</td>
+          </tr>
+          <tr>
+            <td>Power supply insufficient</td>
+            <td style="color:#00d4ff;">Medium</td>
+            <td style="color:#ff4d6d;">High — system instability</td>
+            <td>Use official 5V 3A USB-C adapter; separate 12V for lock</td>
+          </tr>
+          <tr>
+            <td>Keypad debounce issues</td>
+            <td style="color:#ffaa00;">High</td>
+            <td style="color:#00d4ff;">Medium — duplicate inputs</td>
+            <td>200ms software debounce with key-release detection</td>
+          </tr>
+          <tr>
+            <td>Remote access URL changes</td>
+            <td style="color:#00d4ff;">Medium</td>
+            <td style="color:#c8ff00;">Low — inconvenience only</td>
+            <td>Use named Cloudflare Tunnel with permanent domain</td>
+          </tr>
+          <tr>
+            <td>Face recognition accuracy too low</td>
+            <td style="color:#00d4ff;">Medium</td>
+            <td style="color:#00d4ff;">Medium — unreliable access</td>
+            <td>Enrol 5+ samples per person; controlled lighting</td>
+          </tr>
+          <tr>
+            <td>SD card corruption</td>
+            <td style="color:#c8ff00;">Low</td>
+            <td style="color:#ff4d6d;">High — data loss</td>
+            <td>Regular backups; high-quality SD card brand</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>11. Conclusion</h2>
+    <p>VicPi Security represents a meaningful contribution to the field of affordable intelligent security systems. By integrating computer vision, IoT hardware control, web application development, cloud networking, and real-time communication technologies into a single coherent platform, the project demonstrates the transformative potential of modern single-board computer hardware when combined with the rich ecosystem of open-source software libraries available in Python.</p>
+    <p>The system directly addresses a genuine market gap — the absence of affordable, integrated, intelligent security solutions for home and small office environments — and does so using commodity hardware costing a fraction of commercial equivalents. The technical challenges encountered and solved during development, particularly the Python 3.13 compatibility issues with deep learning frameworks and the Pi Camera integration with newer Pi OS releases, contribute practical knowledge to the embedded systems and IoT development communities.</p>
+    <p>The project demonstrates competence across multiple engineering disciplines including embedded systems hardware design, Python software engineering, computer vision algorithm deployment, REST API design, real-time web application development, database management, network security, and cloud infrastructure — making it a comprehensive showcase of final year engineering capability.</p>
+
+  </main>
+</div>
+
+<footer>
+  <span>© 2026 Victor Mulinge — Gearbox Academy</span>
+  <span>username: <a href="#">vicpod</a></span>
+</footer>
+
+<!-- ── Routing & Animation Scripts ── -->
 <script>
-/* ============================================================
-   ✏️  EDIT YOUR JOURNAL DATA HERE
-   ============================================================
-   STATUS OPTIONS per week:
-     "empty"   → Upcoming   (grey)
-     "partial" → In Progress (orange)
-     "done"    → Complete   (green)
+  function handleRouting() {
+    let hash = window.location.hash || '#home';
 
-   DATE: leave "" if not yet attended, or write e.g. "2025-09-01"
-   NOTES: write what you learned. Leave "" if nothing yet.
-   ============================================================ */
+    document.querySelectorAll('.page-view').forEach(page => {
+      page.classList.remove('active-page');
+    });
 
-const DATA = {
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.remove('active');
+    });
 
-  /* ── PROFILE ─────────────────────────────────────── */
-  name:  "Victor Mulinge",
-  about: "I'm a final year student currently pursuing Electrical & Electronics Engineering at UoN. 
-    I'm also part of the Gearbox IoT & Embedded Systems class.",
+    const targetPage = document.querySelector(hash);
+    if (targetPage) {
+      targetPage.classList.add('active-page');
 
-  /* ── WEEKS ───────────────────────────────────────── */
-  weeks: [
-    {
-      topic:  "Week 1",
-      status: "done",   // "empty" | "partial" | "done"
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 2",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 3",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 4",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 5",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 6",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 7",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 8",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 9",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 10",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 11",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 12",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Week 13",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-    {
-      topic:  "Final Project Presentation & Showcase",
-      status: "empty",
-      date:   "",
-      notes:  "",
-    },
-  ],
+      const navLink = document.querySelector(`.nav-link[href="${hash}"]`);
+      if (navLink) navLink.classList.add('active');
 
-  /* ── CAPSTONE PROJECT ────────────────────────────── */
-  capstone: {
-    title: "Smart Surveillance and Access Control System",
-    desc:  "This project is a smart surveillance and access control system built to provide high-quality security at a price point that actually works for people. By using affordable hardware like Raspberry Pi or ESP32 controllers, solenoid locks, and even repurposed webcams, it delivers professional-grade protection without the massive market markup. Imagine being able to leave your heavy luggage in a secure locker room in the CBD, knowing it's protected by RFID or facial recognition, while you go about your business freely? Whether it's for urban locker hubs, home security, or e-commerce delivery points, this project aims to make safety and convenience accessible to everyone. It bridges the gap between expensive proprietary systems and local needs, offering a remotely-accessible platform that proves security doesn't have to be a luxury.",
-  },
+      window.scrollTo(0, 0);
 
-};
-/* ============================================================
-   END OF EDITABLE DATA — don't touch anything below this line
-   ============================================================ */
+      if (hash === '#home' && !window.countersTriggered) {
+        triggerCounters();
+      }
+    }
+  }
 
+  function animateCounter(id, target, duration = 1500) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) { el.textContent = target; clearInterval(timer); return; }
+      el.textContent = Math.floor(start);
+    }, 16);
+  }
 
-// Render profile
-document.getElementById("el-name").textContent  = DATA.name;
-document.getElementById("el-about").textContent = DATA.about;
+  function triggerCounters() {
+    window.countersTriggered = true;
+    animateCounter('counter-weeks', 10);
+    animateCounter('counter-reports', 10);
+    animateCounter('counter-projects', 3);
+  }
 
-// Render capstone
-document.getElementById("el-cap-title").textContent = DATA.capstone.title;
-document.getElementById("el-cap-desc").textContent  = DATA.capstone.desc;
+  window.addEventListener('hashchange', handleRouting);
+  window.addEventListener('DOMContentLoaded', () => {
+    handleRouting();
 
-// Render weeks
-const list = document.getElementById("week-list");
-let doneCount = 0;
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting && window.location.hash === '#home' && !window.countersTriggered) {
+          triggerCounters();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
 
-DATA.weeks.forEach((w, i) => {
-  const s   = w.status || "empty";
-  const cls = s === "done" ? "done" : s === "partial" ? "partial" : "";
-  if (s === "done") doneCount++;
-
-  const [bc, bl] = s === "done"
-    ? ["bdone",    "Complete"]
-    : s === "partial"
-    ? ["bpartial", "In Progress"]
-    : ["bempty",   "Upcoming"];
-
-  const hasNotes = w.notes && w.notes.trim().length > 0;
-  const dateStr  = w.date ? `📅 ${w.date}` : "";
-
-  const item = document.createElement("div");
-  item.className = "week-item " + cls;
-
-  item.innerHTML = `
-    <div class="week-head">
-      <span class="week-num">W${String(i + 1).padStart(2, "0")}</span>
-      <span class="week-topic">${w.topic}</span>
-      <span class="week-badge ${bc}">${bl}</span>
-      <span class="week-chevron">▾</span>
-    </div>
-    <div class="week-body">
-      ${dateStr ? `<div class="week-date">${dateStr}</div>` : ""}
-      <div class="week-notes ${hasNotes ? "" : "empty"}">${
-        hasNotes ? w.notes : "No notes yet."
-      }</div>
-    </div>
-  `;
-
-  item.querySelector(".week-head").addEventListener("click", () => {
-    item.classList.toggle("open");
+    const statsSection = document.getElementById('stats-section');
+    if (statsSection) observer.observe(statsSection);
   });
-
-  list.appendChild(item);
-});
-
-// Progress bar
-document.getElementById("done-n").textContent     = doneCount;
-document.getElementById("prog-fill").style.width  = (doneCount / 14 * 100) + "%";
 </script>
 </body>
 </html>
